@@ -1,6 +1,8 @@
 #!/bin/bash
 # Script to build and install the MicroPython version of Crowpanel 10.1 ESP32-P4
 
+set -euo pipefail
+
 echo "Initializing and preparing build environment..."
 
 # set locations
@@ -15,7 +17,9 @@ if [ ! -d "$DIRECTORY" ]; then
   mkdir -p "$DIRECTORY"
 fi
 
-rm -rf "$crowpanel_dir"/builds/MicroPython/Crowpanel-10.1.bin
+rm -f "$crowpanel_dir"/builds/MicroPython/Crowpanel-10.1.bin
+rm -f "$crowpanel_dir"/builds/MicroPython/bootloader.bin
+rm -f "$crowpanel_dir"/builds/MicroPython/partition-table.bin
 
 rm -rf "$micropython_dir"/build-ESP32_GENERIC_P4-C6_WIFI
 
@@ -27,7 +31,15 @@ mkdir -p "$micropython_dir"/modules/crowpanel
 cp "$crowpanel_dir"/src/MicroPython/micropython.cmake "$micropython_dir"/modules/crowpanel/micropython.cmake
 cp -r "$crowpanel_dir"/src/MicroPython/lcd "$micropython_dir"/modules/crowpanel/lcd
 cp -r "$crowpanel_dir"/src/MicroPython/touch "$micropython_dir"/modules/crowpanel/touch
-cp -r "$crowpanel_dir"/src/MicroPython/sd "$micropython_dir"/modules/crowpanel/sd
+cp "$crowpanel_dir"/src/MicroPython/sd.py "$micropython_dir"/modules/crowpanel/sd.py
+
+# Ensure required managed components are declared for custom LCD/touch modules.
+idf_component_yml="$micropython_dir/main/idf_component.yml"
+tmp_component_yml="$idf_component_yml.tmp"
+grep -v "esp_lcd_ek79007" "$idf_component_yml" | grep -v "esp_lcd_touch_gt911" > "$tmp_component_yml"
+mv "$tmp_component_yml" "$idf_component_yml"
+printf '%s\n' '  espressif/esp_lcd_ek79007: "^1.0.2"' >> "$idf_component_yml"
+printf '%s\n' '  espressif/esp_lcd_touch_gt911: "^1.1.3"' >> "$idf_component_yml"
 
 # copy custom partitions.csv for ESP32-P4 (larger flash partitions)
 cp "$crowpanel_dir"/src/MicroPython/partitions.csv "$micropython_dir"/boards/ESP32_GENERIC_P4/partitions.csv
@@ -78,8 +90,7 @@ make BOARD=ESP32_GENERIC_P4 BOARD_VARIANT=C6_WIFI \
      USER_C_MODULES="$micropython_dir"/modules/crowpanel/micropython.cmake
 
 BUILD_DIR="$micropython_dir/build-ESP32_GENERIC_P4-C6_WIFI"
-cp "$BUILD_DIR"/micropython.bin " v/Crowpanel-10.1.bin
+cp "$BUILD_DIR"/micropython.bin "$crowpanel_dir"/builds/MicroPython/Crowpanel-10.1.bin
 cp "$BUILD_DIR"/bootloader/bootloader.bin "$crowpanel_dir"/builds/MicroPython/bootloader.bin
 cp "$BUILD_DIR"/partition_table/partition-table.bin "$crowpanel_dir"/builds/MicroPython/partition-table.bin
-cp "$BUILD_DIR"/ota_data_initial.bin "$crowpanel_dir"/builds/MicroPython/ota_data_initial.bin
 echo "CrowPanel 10.1 build complete."
