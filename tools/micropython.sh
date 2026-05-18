@@ -31,7 +31,6 @@ mkdir -p "$micropython_dir"/modules/crowpanel
 cp "$crowpanel_dir"/src/MicroPython/micropython.cmake "$micropython_dir"/modules/crowpanel/micropython.cmake
 cp -r "$crowpanel_dir"/src/MicroPython/lcd "$micropython_dir"/modules/crowpanel/lcd
 cp -r "$crowpanel_dir"/src/MicroPython/touch "$micropython_dir"/modules/crowpanel/touch
-cp "$crowpanel_dir"/src/MicroPython/sd.py "$micropython_dir"/modules/crowpanel/sd.py
 
 # Ensure required managed components are declared for custom LCD/touch modules.
 idf_component_yml="$micropython_dir/main/idf_component.yml"
