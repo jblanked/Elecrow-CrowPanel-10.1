@@ -6,4 +6,4 @@ if [ ! -d "$esp_idf_dir" ]; then
     echo "Error: ESP-IDF directory not found at $esp_idf_dir"
     exit 1
 fi
-arch -x86_64 bash -c "source $esp_idf_dir/export.sh && cd $crowpanel_build_dir && python -m esptool --chip esp32p4 -b 460800 --before default_reset --after hard_reset write_flash --erase-all --flash_mode dio --flash_size 16MB --flash_freq 40m 0x2000 bootloader.bin 0x8000 partition-table.bin 0x10000 Crowpanel-10.1.bin"
+arch -x86_64 bash -c "source $esp_idf_dir/export.sh && cd $crowpanel_build_dir && python -m esptool --chip esp32p4 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 40m 0x2000 bootloader.bin 0x8000 partition-table.bin 0x10000 Crowpanel-10.1.bin"
