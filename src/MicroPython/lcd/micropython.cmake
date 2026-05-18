@@ -16,4 +16,9 @@ target_include_directories(usermod_lcd INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
 )
 
+target_link_libraries(usermod_lcd INTERFACE
+    idf::esp_lcd
+    idf::espressif__esp_lcd_ek79007
+)
+
 target_link_libraries(usermod INTERFACE usermod_lcd)
